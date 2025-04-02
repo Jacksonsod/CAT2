@@ -1,7 +1,28 @@
 import React, { useState } from "react";
 import "../styles/components.css";
 
-const Form = ({ onSubmit, initialData = {} }) => {
+const Form = ({ onSubmit, initialData = {}, labels = {}, legends = {} }) => {
+  const defaultLabels = {
+    name: "Child's Name",
+    yearOfBirth: "Year of Birth",
+    parentName: "Parent's Name",
+    parentId: "Parent ID",
+    contact: "Phone Number",
+    email: "Email",
+    address: "Address",
+    allergies: "Allergies (if any)",
+  };
+
+  const defaultLegends = {
+    personalInfo: "Child Information",
+    supervisorInfo: "Parent Information",
+    additionalInfo: "Additional Information",
+    photo: "Child's Photo", // Default legend for photo
+  };
+
+  const formLabels = { ...defaultLabels, ...labels };
+  const formLegends = { ...defaultLegends, ...legends };
+
   const [formData, setFormData] = useState({
     name: initialData.name || "",
     yearOfBirth: initialData.yearOfBirth || "",
@@ -13,6 +34,8 @@ const Form = ({ onSubmit, initialData = {} }) => {
     allergies: initialData.allergies || "",
   });
 
+  const [imagePreview, setImagePreview] = useState(null); // State for image preview
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     // Prevent numbers in text fields
@@ -20,6 +43,17 @@ const Form = ({ onSubmit, initialData = {} }) => {
       return;
     }
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result); // Set the preview URL
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -35,15 +69,16 @@ const Form = ({ onSubmit, initialData = {} }) => {
       address: "",
       allergies: "",
     }); // Reset form
+    setImagePreview(null); // Reset image preview
   };
 
   return (
     <form className="form-styles" onSubmit={handleSubmit}>
-      {/* Child Information */}
+      {/* Personal Information */}
       <fieldset className="form-fieldset">
-        <legend>Child Information</legend>
+        <legend>{formLegends.personalInfo}</legend>
         <div className="form-group">
-          <label htmlFor="name">Child's Name</label>
+          <label htmlFor="name">{formLabels.name}</label>
           <input
             type="text"
             id="name"
@@ -54,7 +89,7 @@ const Form = ({ onSubmit, initialData = {} }) => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="yearOfBirth">Year of Birth</label>
+          <label htmlFor="yearOfBirth">{formLabels.yearOfBirth}</label>
           <select
             id="yearOfBirth"
             name="yearOfBirth"
@@ -72,11 +107,31 @@ const Form = ({ onSubmit, initialData = {} }) => {
         </div>
       </fieldset>
 
-      {/* Parent Information */}
+      {/* Child's Photo */}
       <fieldset className="form-fieldset">
-        <legend>Parent Information</legend>
+        <legend>{formLegends.photo}</legend> {/* Use dynamic legend */}
         <div className="form-group">
-          <label htmlFor="parentName">Parent's Name</label>
+          <label htmlFor="photo">Upload Photo</label>
+          <input
+            type="file"
+            id="photo"
+            name="photo"
+            accept="image/*"
+            onChange={handleImageChange}
+          />
+        </div>
+        {imagePreview && (
+          <div className="image-preview">
+            <img src={imagePreview} alt="Preview" className="preview-image" />
+          </div>
+        )}
+      </fieldset>
+
+      {/* Supervisor Information */}
+      <fieldset className="form-fieldset">
+        <legend>{formLegends.supervisorInfo}</legend>
+        <div className="form-group">
+          <label htmlFor="parentName">{formLabels.parentName}</label>
           <input
             type="text"
             id="parentName"
@@ -87,7 +142,7 @@ const Form = ({ onSubmit, initialData = {} }) => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="parentId">Parent ID</label>
+          <label htmlFor="parentId">{formLabels.parentId}</label>
           <input
             type="text"
             id="parentId"
@@ -98,7 +153,7 @@ const Form = ({ onSubmit, initialData = {} }) => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="contact">Phone Number</label>
+          <label htmlFor="contact">{formLabels.contact}</label>
           <input
             type="tel"
             id="contact"
@@ -110,7 +165,7 @@ const Form = ({ onSubmit, initialData = {} }) => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{formLabels.email}</label>
           <input
             type="email"
             id="email"
@@ -124,9 +179,9 @@ const Form = ({ onSubmit, initialData = {} }) => {
 
       {/* Additional Information */}
       <fieldset className="form-fieldset">
-        <legend>Additional Information</legend>
+        <legend>{formLegends.additionalInfo}</legend>
         <div className="form-group">
-          <label htmlFor="address">Address</label>
+          <label htmlFor="address">{formLabels.address}</label>
           <textarea
             id="address"
             name="address"
@@ -136,7 +191,7 @@ const Form = ({ onSubmit, initialData = {} }) => {
           ></textarea>
         </div>
         <div className="form-group">
-          <label htmlFor="allergies">Allergies (if any)</label>
+          <label htmlFor="allergies">{formLabels.allergies}</label>
           <input
             type="text"
             id="allergies"

@@ -11,14 +11,17 @@ const Home = () => {
                 <Navbar />
             </header>
             <main className="home-main">
-            <section className="home-section welcome-section">
-
+                <section className="home-section welcome-section">
+                    <h1>Welcome to the Child Management System</h1>
+                    <p>
+                        Our platform is designed to help you manage and monitor child-related activities 
+                        with ease. Stay organized and ensure the best care for children.
+                    </p>
+                    <img src={homeImage} alt="Child Management" className="home-image" />
                 </section>
-              </main>
-            
-                <Footer />
-                </div>
-
+            </main>
+            <Footer />
+        </div>
     );
 };
 

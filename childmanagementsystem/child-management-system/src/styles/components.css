@@ -20,7 +20,7 @@ body.dark-mode {
 body {
     font-family: Arial, sans-serif;
     background-color: whitesmoke;
-    color: var(--secondary-color);
+    color: var(--primary-color); /* Changed from var(--secondary-color) to var(--primary-color) for better visibility */
     transition: background-color var(--transition-duration), color var(--transition-duration);
     padding-top: 70px;
     margin: 20px;
@@ -159,7 +159,7 @@ input:checked + .slider:before {
 }
 
 .navbar-a-styles {
-    color: var(--secondary-color);
+    color: var(--primary-color); /* Changed from var(--secondary-color) to var(--primary-color) for better visibility */
     font-weight: bold;
     font-size: 16px;
     padding: 8px 12px;
@@ -180,7 +180,7 @@ input:checked + .slider:before {
 
 .footer-styles {
     background-color: var(--primary-color);
-    color: var(--secondary-color);
+    color: var(--accent-color); /* Changed from var(--secondary-color) to var(--accent-color) for better visibility */
     text-align: center;
     padding: 15px 0;
     font-size: 14px;
@@ -497,4 +497,75 @@ select:invalid {
     justify-content: center;
     gap: 20px;
     padding: 20px;
+}
+
+/* New styles for Children component */
+
+.children-main {
+    padding: 20px;
+}
+
+.children-container {
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+.add-button {
+    margin-bottom: 20px;
+}
+
+.data-grid-container {
+    height: 400px;
+    margin-top: 20px;
+}
+
+/* New styles for Attendance component */
+
+.attendance-main {
+    padding: 20px;
+}
+
+.attendance-container {
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+.data-grid-container {
+    height: 400px;
+    margin-top: 20px;
+}
+
+.add-button {
+    margin-bottom: 20px;
+}
+
+/* New styles for Reports component */
+
+.reports-main {
+    padding: 20px;
+}
+
+.reports-container {
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+.chart-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+/* New styles for Image Preview */
+
+.image-preview {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.preview-image {
+    max-width: 100%;
+    max-height: 200px;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

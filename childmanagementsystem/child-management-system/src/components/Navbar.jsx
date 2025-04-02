@@ -3,12 +3,13 @@ import { NavLink } from "react-router-dom";
 import Brightness7 from "@mui/icons-material/Brightness7";
 import Brightness4 from "@mui/icons-material/Brightness4";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Drawer, List, ListItem, ListItemText, IconButton, Switch } from "@mui/material";
-import '../styles/components.css';
+import { Drawer, List, ListItem, ListItemText, IconButton, Switch, Typography, useMediaQuery } from "@mui/material";
+import "../styles/components.css";
 
 const Navbar = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width:768px)");
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -31,50 +32,51 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="navbar-styles fixed-navbar">
-      <h3 className="navbar-title">Children Care Management</h3>
-      <div className="menu-toggle">
-        <IconButton onClick={toggleDrawer(true)}>
-          <MenuIcon style={{ color: "var(--secondary-color)" }} />
-        </IconButton>
-        <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
-          <List>
+    <div className="navbar-container">
+      <div className="navbar-content">
+        <Typography variant="h6" className="navbar-title">
+          Children Care Management
+        </Typography>
+        {isMobile ? (
+          <IconButton onClick={toggleDrawer(true)} style={{ color: "var(--secondary-color)" }}>
+            <MenuIcon />
+          </IconButton>
+        ) : (
+          <div className="navbar-links">
             {menuItems.map((item, index) => (
-              <ListItem button key={index} onClick={toggleDrawer(false)}>
-                <NavLink to={item.path} className="navbar-a-styles" activeClassName="active-link">
-                  <ListItemText primary={item.text} />
-                </NavLink>
-              </ListItem>
+              <NavLink key={index} to={item.path} className="navbar-link">
+                {item.text}
+              </NavLink>
             ))}
-            <ListItem>
+            <div className="dark-mode-switch-container">
               <Switch checked={isDarkMode} onChange={toggleDarkMode} />
-              <span className="dark-mode-label">
+              <Typography variant="body2">
                 {isDarkMode ? <Brightness4 /> : <Brightness7 />}
                 {isDarkMode ? "Dark Mode" : "Light Mode"}
-              </span>
-            </ListItem>
-          </List>
-        </Drawer>
+              </Typography>
+            </div>
+          </div>
+        )}
       </div>
-      <ul className="navbar-ul-styles">
-        {menuItems.map((item, index) => (
-          <li className="navbar-li-styles" key={index}>
-            <NavLink to={item.path} className="navbar-a-styles" activeClassName="active-link">
-              {item.text}
-            </NavLink>
-          </li>
-        ))}
-        <li>
-          <div className="dark-mode-switch">
+      <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+        <List className="drawer-list">
+          {menuItems.map((item, index) => (
+            <ListItem button key={index} onClick={toggleDrawer(false)}>
+              <NavLink to={item.path} className="navbar-drawer-link">
+                <ListItemText primary={item.text} />
+              </NavLink>
+            </ListItem>
+          ))}
+          <ListItem>
             <Switch checked={isDarkMode} onChange={toggleDarkMode} />
-            <span className="dark-mode-label">
+            <Typography variant="body2">
               {isDarkMode ? <Brightness4 /> : <Brightness7 />}
               {isDarkMode ? "Dark Mode" : "Light Mode"}
-            </span>
-          </div>
-        </li>
-      </ul>
-    </nav>
+            </Typography>
+          </ListItem>
+        </List>
+      </Drawer>
+    </div>
   );
 };
 

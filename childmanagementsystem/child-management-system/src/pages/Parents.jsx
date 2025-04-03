@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import { Typography, Box, Button } from '@mui/material';
+import { Typography, Box, Button, Drawer, List, ListItem, ListItemText } from '@mui/material';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { useTheme } from '@mui/material/styles';
 
 const activityData = [
     { day: 'Mon', activity: 5 },
@@ -13,11 +13,13 @@ const activityData = [
 ];
 
 const Parents = () => {
-    return (
-        <div>
-            <Navbar />
-            <main className="parents-main">
-                <Box sx={{ padding: '20px' }}>
+    const theme = useTheme(); // Access the Material-UI theme
+    const [selectedPage, setSelectedPage] = useState('dashboard'); // State to track selected page
+
+    const renderContent = () => {
+        if (selectedPage === 'dashboard') {
+            return (
+                <Box>
                     <Typography variant="h4" gutterBottom>
                         Parents Dashboard
                     </Typography>
@@ -56,8 +58,66 @@ const Parents = () => {
                         </ResponsiveContainer>
                     </Box>
                 </Box>
+            );
+        }
+        // Add more pages if needed
+        return null;
+    };
+
+    return (
+        <div>
+            <Navbar />
+            <Drawer variant="permanent" anchor="left" sx={{ width: 200, flexShrink: 0 }}>
+                <Box sx={{ width: 240, height: '100vh', backgroundColor: theme.palette.primary.main }}>
+                    <Typography variant="h6" gutterBottom sx={{ padding: '20px' }}>
+                        Parents Navigation
+                    </Typography>
+                    <List>
+                        <ListItem
+                            button
+                            sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}
+                            onClick={() => setSelectedPage('dashboard')} // Set selected page to 'dashboard'
+                        >
+                            <ListItemText primary="Dashboard" sx={{ color: theme.palette.primary.contrastText }} />
+                        </ListItem>
+                        <ListItem
+                            button
+                            component="a"
+                            href="/book-daycare"
+                            sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}
+                        >
+                            <ListItemText primary="Book Daycare Slot" sx={{ color: theme.palette.primary.contrastText }} />
+                        </ListItem>
+                        <ListItem
+                            button
+                            component="a"
+                            href="/view-attendance"
+                            sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}
+                        >
+                            <ListItemText primary="View Attendance" sx={{ color: theme.palette.primary.contrastText }} />
+                        </ListItem>
+                        <ListItem
+                            button
+                            component="a"
+                            href="/register"
+                            sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}
+                        >
+                            <ListItemText primary="Register & Book Slot" sx={{ color: theme.palette.primary.contrastText }} />
+                        </ListItem>
+                        <ListItem
+                            button
+                            component="a"
+                            href="/add-child"
+                            sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}
+                        >
+                            <ListItemText primary="Add Child" sx={{ color: theme.palette.primary.contrastText }} />
+                        </ListItem>
+                    </List>
+                </Box>
+            </Drawer>
+            <main className="parents-main" style={{ marginLeft: 300, padding: '10px' }}>
+                {renderContent()}
             </main>
-            <Footer />
         </div>
     );
 };

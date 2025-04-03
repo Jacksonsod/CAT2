@@ -23,7 +23,12 @@ body {
     color: var(--primary-color); /* Changed from var(--secondary-color) to var(--primary-color) for better visibility */
     transition: background-color var(--transition-duration), color var(--transition-duration);
     padding-top: 70px;
-    margin: 20px;
+    margin: 0; /* Adjusted margin */
+    padding: 0; /* Adjusted padding */
+}
+
+.admin-main, .parents-main {
+    margin-top: 64px; /* Adjust for AppBar height */
 }
 
 .dark-mode-toggle {
@@ -450,18 +455,17 @@ select:invalid {
 
 .navbar-drawer-link {
     text-decoration: none;
-    color: var(--primary-color);
-    font-weight: bold;
+    color: inherit; /* Adjusted color */
+}
+
+.drawer-list {
+    width: 250px;
 }
 
 .dark-mode-switch-container {
     display: flex;
     align-items: center;
     gap: 10px;
-}
-
-.drawer-list {
-    width: 250px;
 }
 
 /* New styles for Home component */
@@ -568,4 +572,9 @@ select:invalid {
     border: 1px solid #ccc;
     border-radius: var(--border-radius);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.MuiAppBar-root {
+    background-color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

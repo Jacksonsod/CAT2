@@ -8,6 +8,7 @@ import ChildrenPage from '../pages/Children';
 import '../styles/components.css';
 import Caregivers from './Caregivers';
 import Attendance from './Attendance';
+import Reports from './Reports'; // Import Reports component if it exists
 
 const data = [
     { name: 'Jan', caregivers: 85, children: 120 },
@@ -27,8 +28,21 @@ const attendanceData = [
 
 const Admin = () => {
     const theme = useTheme(); // Access the Material-UI theme
+    const [selectedPage, setSelectedPage] = useState('dashboard'); // State to track selected page
 
     const renderContent = () => {
+        if (selectedPage === 'children') {
+            return <ChildrenPage />;
+        }
+        if (selectedPage === 'caregivers') {
+            return <Caregivers />;
+        }
+        if (selectedPage === 'attendance') {
+            return <Attendance />;
+        }
+        if (selectedPage === 'reports') {
+            return <Reports />; // Render Reports component
+        }
         return (
             <Box>
                 <Typography variant="h4" gutterBottom>
@@ -119,22 +133,47 @@ const Admin = () => {
                         Admin Navigation
                     </Typography>
                     <List>
-                        <ListItem button sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}>
+                        <ListItem
+                            button
+                            sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}
+                            onClick={() => setSelectedPage('dashboard')} // Set selected page to 'dashboard'
+                        >
                             <ListItemText primary="Admin Dashboard" sx={{ color: theme.palette.primary.contrastText }} />
                         </ListItem>
-                        <ListItem button sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}>
+                        <ListItem
+                            button
+                            sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}
+                            onClick={() => setSelectedPage('children')} // Set selected page to 'children'
+                        >
                             <ListItemText primary="Manage Children" sx={{ color: theme.palette.primary.contrastText }} />
                         </ListItem>
-                        <ListItem button sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}>
+                        <ListItem
+                            button
+                            sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}
+                            onClick={() => setSelectedPage('caregivers')} // Set selected page to 'caregivers'
+                        >
                             <ListItemText primary="Manage Caregivers" sx={{ color: theme.palette.primary.contrastText }} />
                         </ListItem>
-                        <ListItem button sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}>
+                        <ListItem
+                            button
+                            sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}
+                            onClick={() => setSelectedPage('attendance')} // Set selected page to 'attendance'
+                        >
                             <ListItemText primary="Manage Attendance" sx={{ color: theme.palette.primary.contrastText }} />
                         </ListItem>
-                        <ListItem button sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}>
+                        <ListItem
+                            button
+                            sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}
+                            onClick={() => setSelectedPage('reports')} // Set selected page to 'reports'
+                        >
                             <ListItemText primary="View Reports" sx={{ color: theme.palette.primary.contrastText }} />
                         </ListItem>
-                        <ListItem button component="a" href="/settings" sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}>
+                        <ListItem
+                            button
+                            component="a"
+                            href="/settings"
+                            sx={{ cursor: 'pointer', color: theme.palette.primary.contrastText }}
+                        >
                             <ListItemText primary="System Settings" sx={{ color: theme.palette.primary.contrastText }} />
                         </ListItem>
                     </List>

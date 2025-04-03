@@ -81,9 +81,6 @@ const Caregivers = () => {
                     <Typography variant="h4" gutterBottom>
                         Caregivers Management
                     </Typography>
-                    <Typography variant="body1" gutterBottom>
-                        Manage the details of caregivers working in the daycare. Add, update, or view their profiles.
-                    </Typography>
                     <Button
                         variant="contained"
                         color="primary"

@@ -6,6 +6,7 @@ import '../../src/pages/Home';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState(''); // State for role
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -22,7 +23,7 @@ const Login = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!email) {
+        if (!email.trim()) {
             setError('Email is required.');
             return;
         }
@@ -32,20 +33,22 @@ const Login = () => {
             return;
         }
 
-        if (!password) {
+        if (!password.trim()) {
             setError('Password is required.');
             return;
         }
 
-        if (!validatePassword(password)) {
-            setError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.');
+        if (!role) {
+            setError('Role is required.');
             return;
         }
 
         // Retrieve user credentials from local storage
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        if (!storedUser || storedUser.email !== email || storedUser.password !== password) {
-            setError('Invalid email or password.');
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const user = users.find((u) => u.email === email && u.password === password && u.role === role);
+
+        if (!user) {
+            setError('Invalid email, password, or role.');
             return;
         }
 
@@ -75,6 +78,19 @@ const Login = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
+                </div>
+                <div>
+                    <label htmlFor="role">Role:</label>
+                    <select
+                        id="role"
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                    >
+                        <option value="">Select Role</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Parent">Parent</option>
+                        <option value="Caregiver">Caregiver</option>
+                    </select>
                 </div>
                 {error && <p className="error">{error}</p>}
                 <button type="submit">Login</button>

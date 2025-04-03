@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import { Typography, Box, Button, Drawer, List, ListItem, ListItemText } from '@mui/material';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTheme } from '@mui/material/styles';
+import Footer from '../components/Footer';
 
 const activityData = [
     { day: 'Mon', activity: 5 },
@@ -65,6 +66,7 @@ const Parents = () => {
     };
 
     return (
+        <>
         <div>
             <Navbar />
             <Drawer variant="permanent" anchor="left" sx={{ width: 200, flexShrink: 0 }}>
@@ -119,6 +121,8 @@ const Parents = () => {
                 {renderContent()}
             </main>
         </div>
+        <Footer />
+        </>
     );
 };
 

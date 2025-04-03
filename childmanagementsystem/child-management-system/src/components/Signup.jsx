@@ -8,6 +8,7 @@ const Signup = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [role, setRole] = useState(''); // State for role
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -23,16 +24,27 @@ const Signup = () => {
         return passwordRegex.test(password);
     };
 
+    // Validate name format
+    const validateName = (name) => {
+        const nameRegex = /^[A-Za-z\s]+$/; // Only allows letters and spaces
+        return nameRegex.test(name);
+    };
+
     // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!name) {
+        if (!name.trim()) {
             setError('Name is required.');
             return;
         }
 
-        if (!email) {
+        if (!validateName(name)) {
+            setError('Name should only contain letters and spaces.');
+            return;
+        }
+
+        if (!email.trim()) {
             setError('Email is required.');
             return;
         }
@@ -52,14 +64,25 @@ const Signup = () => {
             return;
         }
 
+        if (!confirmPassword) {
+            setError('Confirm Password is required.');
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError('Passwords do not match.');
             return;
         }
 
+        if (!role) {
+            setError('Role is required.');
+            return;
+        }
+
         setError('');
-        // Save user credentials to local storage
-        localStorage.setItem('user', JSON.stringify({ name, email, password }));
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        users.push({ name, email, password, role });
+        localStorage.setItem('users', JSON.stringify(users)); // Store user credentials
         navigate('/login'); // Redirect to login page
     };
 
@@ -102,6 +125,19 @@ const Signup = () => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                     />
+                </div>
+                <div>
+                    <label htmlFor="role">Role:</label>
+                    <select
+                        id="role"
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                    >
+                        <option value="">Select Role</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Parent">Parent</option>
+                        <option value="Caregiver">Caregiver</option>
+                    </select>
                 </div>
                 {error && <p className="error">{error}</p>}
                 <button type="submit">Sign Up</button>

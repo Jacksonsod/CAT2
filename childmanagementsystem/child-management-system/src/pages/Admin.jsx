@@ -253,6 +253,7 @@ const Admin = () => {
     };
 
     return (
+        <>
         <div>
             <Navbar />
             <Drawer variant="permanent" anchor="left" sx={{ width: 200, flexShrink: 0 }}>
@@ -390,6 +391,9 @@ const Admin = () => {
                 </DialogActions>
             </Dialog>
         </div>
+        
+        <Footer />
+        </>
     );
 };
 

@@ -6,6 +6,7 @@ import "../styles/components.css";
 
 const Home = () => {
     return (
+        <>
         <div className="home-container">
             <header>
                 <Navbar />
@@ -20,8 +21,10 @@ const Home = () => {
                     <img src={homeImage} alt="Child Management" className="home-image" />
                 </section>
             </main>
-            <Footer />
+            
         </div>
+        <Footer />
+        </>
     );
 };
 

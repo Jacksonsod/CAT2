@@ -78,7 +78,7 @@ const Navbar = () => {
   };
 
   const menuItems = [
-    { text: "Home", path: "/" },
+    { text: "Home", path: "/home" },
     { text: "Children", path: "/children" },
     { text: "Caregivers", path: "/caregivers" },
     { text: "Attendance", path: "/attendance" },

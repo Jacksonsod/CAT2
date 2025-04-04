@@ -4,9 +4,18 @@ import { Box, Button, Typography, Dialog, DialogTitle, DialogContent, DialogActi
 import AddIcon from '@mui/icons-material/Add';
 import Form from '../components/Form';
 import Navbar from '../components/Navbar'; // Import Navbar
+import { Bar } from 'react-chartjs-2'; // Import Bar chart for histogram
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { v4 as uuidv4 } from 'uuid'; // Import uuid for unique IDs
+
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const Caregivers = () => {
-    const [caregiversList, setCaregiversList] = useState([]); // State to store registered caregivers
+    const [caregiversList, setCaregiversList] = useState(() => {
+        const storedCaregivers = localStorage.getItem('caregivers');
+        return storedCaregivers ? JSON.parse(storedCaregivers) : [];
+    }); // Load caregivers from local storage
     const [childrenList, setChildrenList] = useState([]); // State to store children list
     const [isDialogOpen, setIsDialogOpen] = useState(false); // State to manage dialog visibility
     const [selectedCaregiver, setSelectedCaregiver] = useState(null); // State to store selected caregiver for viewing
@@ -14,12 +23,13 @@ const Caregivers = () => {
     const [selectedChild, setSelectedChild] = useState(''); // State to store selected child for assignment
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // State to manage edit dialog visibility
     const [editCaregiver, setEditCaregiver] = useState(null); // State to store caregiver being edited
+    const [isAdmin, setIsAdmin] = useState(false); // State to track if the user is an admin
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State to manage delete confirmation dialog
+    const [caregiverToDelete, setCaregiverToDelete] = useState(null); // State to store caregiver to delete
 
-    // Load caregivers and children from localStorage on component mount
+    // Load children from localStorage on component mount
     useEffect(() => {
-        const storedCaregivers = JSON.parse(localStorage.getItem('caregivers')) || [];
         const storedChildren = JSON.parse(localStorage.getItem('children')) || [];
-        setCaregiversList(storedCaregivers);
         setChildrenList(storedChildren);
     }, []);
 
@@ -28,8 +38,13 @@ const Caregivers = () => {
         localStorage.setItem('caregivers', JSON.stringify(caregiversList));
     }, [caregiversList]);
 
+    useEffect(() => {
+        const userRole = localStorage.getItem('userRole'); // Assume user role is stored in localStorage
+        setIsAdmin(userRole === 'admin'); // Set isAdmin to true if the user role is 'admin'
+    }, []);
+
     const handleFormSubmit = (caregiverData) => {
-        const newCaregiver = { ...caregiverData, assignChild: selectedChild }; // Add assign child to caregiver data
+        const newCaregiver = { ...caregiverData, id: uuidv4(), assignChild: selectedChild }; // Assign a unique ID
         setCaregiversList([...caregiversList, newCaregiver]); // Add new caregiver to the list
         setIsDialogOpen(false); // Close the dialog after submission
         setSelectedChild(''); // Reset selected child
@@ -47,9 +62,16 @@ const Caregivers = () => {
         setSelectedCaregiver(null); // Clear the selected caregiver
     };
 
-    const handleDelete = (id) => {
-        const updatedList = caregiversList.filter((_, index) => index + 1 !== id);
+    const handleOpenDeleteDialog = (caregiver) => {
+        setCaregiverToDelete(caregiver); // Set the caregiver to delete
+        setIsDeleteDialogOpen(true); // Open the delete confirmation dialog
+    };
+
+    const handleConfirmDelete = () => {
+        const updatedList = caregiversList.filter((caregiver) => caregiver.id !== caregiverToDelete.id);
         setCaregiversList(updatedList); // Update the list after deletion
+        setIsDeleteDialogOpen(false); // Close the dialog
+        setCaregiverToDelete(null); // Clear the caregiver to delete
     };
 
     const handleEdit = (caregiver) => {
@@ -68,14 +90,13 @@ const Caregivers = () => {
     const columns = [
         { field: 'id', headerName: 'ID', width: 70 },
         { field: 'name', headerName: 'Name', width: 150 },
-        { field: 'experience', headerName: 'Experience (Years)', width: 150 },
-        { field: 'specialization', headerName: 'Specialization', width: 150 },
+        { field: 'supervisor', headerName: 'Supervisor', width: 150 },
         { field: 'contact', headerName: 'Contact', width: 150 },
         { field: 'assignChild', headerName: 'Assigned Child', width: 150 },
         {
             field: 'actions',
             headerName: 'Actions',
-            width: 250,
+            width: 200,
             renderCell: (params) => (
                 <>
                     <Button
@@ -89,18 +110,20 @@ const Caregivers = () => {
                     <Button
                         variant="outlined"
                         color="secondary"
-                        onClick={() => handleDelete(params.row.id)}
+                        onClick={() => handleOpenDeleteDialog(params.row)}
                         style={{ marginRight: '10px' }}
                     >
                         Delete
                     </Button>
-                    <Button
-                        variant="outlined"
-                        color="info"
-                        onClick={() => handleEdit(params.row)}
-                    >
-                        Edit
-                    </Button>
+                    {isAdmin && ( // Show the Edit button only if the user is an admin
+                        <Button
+                            variant="outlined"
+                            color="info"
+                            onClick={() => handleEdit(params.row)}
+                        >
+                            Edit
+                        </Button>
+                    )}
                 </>
             ),
         },
@@ -109,17 +132,70 @@ const Caregivers = () => {
     const rows = caregiversList.map((caregiver, index) => ({
         id: index + 1,
         name: caregiver.name,
-        experience: caregiver.experience,
-        specialization: caregiver.specialization,
+        supervisor: caregiver.parentName || 'N/A', // Display supervisor's name or 'N/A' if not available
         contact: caregiver.contact,
-        assignChild: caregiver.assignChild || 'None', // Correctly reference assignChild
+        assignChild: caregiver.assignChild || 'None',
     })); // Ensure the object and map function are properly closed
+
+    const calculateActivitiesPerCaregiver = () => {
+        const storedActivities = localStorage.getItem('childActivities');
+        const activities = storedActivities ? JSON.parse(storedActivities) : [];
+        return caregiversList.map((caregiver) => {
+            const activityCount = activities.filter(
+                (activity) => activity.caregiverId === caregiver.id
+            ).length;
+            return { name: caregiver.name, activityCount };
+        });
+    };
+
+    const activitiesPerCaregiver = calculateActivitiesPerCaregiver();
+
+    const histogramData = {
+        labels: activitiesPerCaregiver.map((caregiver) => caregiver.name),
+        datasets: [
+            {
+                label: 'Activity Count',
+                data: activitiesPerCaregiver.map((caregiver) => caregiver.activityCount),
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+            },
+        ],
+    };
+
+    const histogramOptions = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Histogram of Activities Per Caregiver',
+            },
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Caregivers',
+                },
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: 'Number of Activities',
+                },
+                beginAtZero: true,
+            },
+        },
+    };
 
     return (
         <>
             <Navbar />
-            <Box sx={{ padding: '20px' }}>
-                <Typography variant="h4" gutterBottom>
+            <Box sx={{ padding: '20px', backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
+                <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#3f51b5' }}>
                     Caregivers Management
                 </Typography>
                 <Button
@@ -127,12 +203,12 @@ const Caregivers = () => {
                     color="primary"
                     startIcon={<AddIcon />}
                     onClick={() => setIsDialogOpen(true)}
-                    className="add-button"
+                    sx={{ marginBottom: '20px', backgroundColor: '#3f51b5', '&:hover': { backgroundColor: '#303f9f' } }}
                 >
                     Add New
                 </Button>
-                <Box sx={{ marginTop: '20px' }}>
-                    <Typography variant="h5" gutterBottom>
+                <Box sx={{ marginTop: '20px', backgroundColor: '#ffffff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
+                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: '#3f51b5' }}>
                         Registered Caregivers
                     </Typography>
                     <DataGrid
@@ -142,10 +218,19 @@ const Caregivers = () => {
                         rowsPerPageOptions={[5, 10, 20]}
                         checkboxSelection
                         disableSelectionOnClick
+                        sx={{
+                            '& .MuiDataGrid-columnHeaders': { backgroundColor: '#f1f1f1', fontWeight: 'bold' },
+                            '& .MuiDataGrid-row:hover': { backgroundColor: '#f5f5f5' },
+                            '& .MuiTablePagination-toolbar': { justifyContent: 'center' }, // Center rows per page selector
+                        }}
                     />
                 </Box>
+                <Box sx={{ marginTop: '40px', backgroundColor: '#ffffff', padding: '10px', borderRadius: '6px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
+                   
+                    <Bar data={histogramData} options={histogramOptions} />
+                </Box>
                 <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
-                    <DialogTitle>Add New Caregiver</DialogTitle>
+                    <DialogTitle sx={{ backgroundColor: '#3f51b5', color: '#ffffff' }}>Add New Caregiver</DialogTitle>
                     <DialogContent>
                         <Form 
                             onSubmit={handleFormSubmit} 
@@ -188,19 +273,18 @@ const Caregivers = () => {
                     </DialogActions>
                 </Dialog>
                 <Dialog open={!!selectedCaregiver} onClose={handleCloseViewDialog}>
-                    <DialogTitle>Caregiver Details</DialogTitle>
+                    <DialogTitle sx={{ backgroundColor: '#3f51b5', color: '#ffffff' }}>Caregiver Details</DialogTitle>
                     <DialogContent>
                         {isLoading ? (
                             <LinearProgress />
                         ) : (
                             selectedCaregiver && (
-                                <div>
+                                <Box sx={{ padding: '10px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
                                     <Typography variant="body1"><strong>Name:</strong> {selectedCaregiver.name}</Typography>
                                     <Typography variant="body1"><strong>Assign Child:</strong> {selectedCaregiver.assignChild || 'None'}</Typography>
-                                    <Typography variant="body1"><strong>Experience:</strong> {selectedCaregiver.experience} years</Typography>
-                                    <Typography variant="body1"><strong>Specialization:</strong> {selectedCaregiver.specialization}</Typography>
+                                    <Typography variant="body1"><strong>Supervisor:</strong> {selectedCaregiver.parentName}</Typography>
                                     <Typography variant="body1"><strong>Contact:</strong> {selectedCaregiver.contact}</Typography>
-                                </div>
+                                </Box>
                             )
                         )}
                     </DialogContent>
@@ -209,7 +293,7 @@ const Caregivers = () => {
                     </DialogActions>
                 </Dialog>
                 <Dialog open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)}>
-                    <DialogTitle>Edit Caregiver</DialogTitle>
+                    <DialogTitle sx={{ backgroundColor: '#3f51b5', color: '#ffffff' }}>Edit Caregiver</DialogTitle>
                     <DialogContent>
                         <Form
                             onSubmit={handleEditSubmit}
@@ -217,7 +301,6 @@ const Caregivers = () => {
                             labels={{
                                 name: "Caregiver's Name",
                                 experience: 'Experience (Years)',
-                                specialization: 'Specialization',
                                 contact: 'Phone Number',
                                 assignChild: 'Assigned Child',
                             }}
@@ -226,6 +309,23 @@ const Caregivers = () => {
                     <DialogActions>
                         <Button onClick={() => setIsEditDialogOpen(false)} color="secondary">
                             Cancel
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+                <Dialog open={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)}>
+                    <DialogTitle>Confirm Deletion</DialogTitle>
+                    <DialogContent>
+                        <Typography>
+                            Are you sure you want to delete caregiver{' '}
+                            <strong>{caregiverToDelete?.name}</strong>?
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setIsDeleteDialogOpen(false)} color="secondary">
+                            Cancel
+                        </Button>
+                        <Button onClick={handleConfirmDelete} color="primary">
+                            Confirm
                         </Button>
                     </DialogActions>
                 </Dialog>

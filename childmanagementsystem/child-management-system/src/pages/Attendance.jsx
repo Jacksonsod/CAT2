@@ -1,18 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box, Button, Typography, Dialog, DialogTitle, DialogContent, DialogActions, LinearProgress } from '@mui/material'; // Import LinearProgress
+import { Box, Button, Typography, Dialog, DialogTitle, DialogContent, DialogActions, LinearProgress, Grid } from '@mui/material'; // Import Grid
 
 const Attendance = () => {
     const [attendanceList, setAttendanceList] = useState([]); // State to store attendance records
     const [isDialogOpen, setIsDialogOpen] = useState(false); // State to manage dialog visibility
     const [selectedRecord, setSelectedRecord] = useState(null); // State to store selected record for viewing
     const [isLoading, setIsLoading] = useState(false); // State to manage progress bar visibility
+    const [registeredChildren, setRegisteredChildren] = useState([]); // State to store registered children
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // State to manage edit dialog visibility
+    const [recordToEdit, setRecordToEdit] = useState(null); // State to store the record being edited
 
-    const handleMarkAttendance = (record) => {
-        setAttendanceList([...attendanceList, record]); // Add new attendance record
+    useEffect(() => {
+        const storedChildren = localStorage.getItem('registeredChildren');
+        if (storedChildren) {
+            setRegisteredChildren(JSON.parse(storedChildren)); // Load registered children from local storage
+        }
+    }, []);
+
+    const handleMarkAttendance = (updatedAttendance) => {
+        setAttendanceList(updatedAttendance); // Update attendance list
         setIsDialogOpen(false); // Close the dialog after submission
+    };
+
+    const handleEditAttendance = (record) => {
+        setRecordToEdit(record); // Set the record to be edited
+        setIsEditDialogOpen(true); // Open the edit dialog
+    };
+
+    const handleSaveEdit = (updatedRecord) => {
+        setAttendanceList((prevList) =>
+            prevList.map((record, index) =>
+                index + 1 === updatedRecord.id ? { ...record, status: updatedRecord.status } : record
+            )
+        ); // Update the specific record in the attendance list by matching the ID
+        setIsEditDialogOpen(false); // Close the edit dialog
     };
 
     const handleView = (record) => {
@@ -27,6 +51,19 @@ const Attendance = () => {
         setSelectedRecord(null); // Clear the selected record
     };
 
+    const calculateAttendanceProgress = () => {
+        const totalSessions = attendanceList.length;
+        const attendedSessions = attendanceList.filter(record => record.status === 'Present').length;
+        const absentSessions = totalSessions - attendedSessions;
+
+        const attendedPercentage = totalSessions > 0 ? (attendedSessions / totalSessions) * 100 : 0;
+        const absentPercentage = totalSessions > 0 ? (absentSessions / totalSessions) * 100 : 0;
+
+        return { attendedPercentage, absentPercentage };
+    };
+
+    const { attendedPercentage, absentPercentage } = calculateAttendanceProgress();
+
     const columns = [
         { field: 'id', headerName: 'ID', width: 70 },
         { field: 'name', headerName: 'Name', width: 150 },
@@ -35,7 +72,7 @@ const Attendance = () => {
         {
             field: 'actions',
             headerName: 'Actions',
-            width: 200,
+            width: 250,
             renderCell: (params) => (
                 <>
                     <Button
@@ -45,6 +82,13 @@ const Attendance = () => {
                         style={{ marginRight: '10px' }}
                     >
                         View
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="secondary"
+                        onClick={() => handleEditAttendance(params.row)}
+                    >
+                        Edit
                     </Button>
                 </>
             ),
@@ -77,19 +121,32 @@ const Attendance = () => {
                     >
                         Mark Attendance
                     </Button>
-                    <div className="data-grid-container">
-                        <Typography variant="h5" gutterBottom>
-                            Attendance Records
-                        </Typography>
-                        <DataGrid
-                            rows={rows}
-                            columns={columns}
-                            pageSize={5}
-                            rowsPerPageOptions={[5, 10, 20]}
-                            checkboxSelection={false}
-                            disableSelectionOnClick
-                        />
-                    </div>
+                    <Grid container spacing={2}>
+                        <Grid item xs={3}>
+                            <Typography variant="h6" gutterBottom>
+                                Attendance Progress
+                            </Typography>
+                            <Typography variant="body2">Present: {attendedPercentage.toFixed(1)}%</Typography>
+                            <LinearProgress variant="determinate" value={attendedPercentage} color="primary" />
+                            <Typography variant="body2" style={{ marginTop: '10px' }}>Absent: {absentPercentage.toFixed(1)}%</Typography>
+                            <LinearProgress variant="determinate" value={absentPercentage} color="secondary" />
+                        </Grid>
+                        <Grid item xs={9}>
+                            <div className="data-grid-container">
+                                <Typography variant="h5" gutterBottom>
+                                    Attendance Records
+                                </Typography>
+                                <DataGrid
+                                    rows={rows}
+                                    columns={columns}
+                                    pageSize={5}
+                                    rowsPerPageOptions={[5, 10, 20]}
+                                    checkboxSelection={false}
+                                    disableSelectionOnClick
+                                />
+                            </div>
+                        </Grid>
+                    </Grid>
                 </div>
             </main>
             <Footer />
@@ -100,29 +157,36 @@ const Attendance = () => {
                         onSubmit={(e) => {
                             e.preventDefault();
                             const formData = new FormData(e.target);
-                            const record = {
-                                name: formData.get('name'),
-                                date: formData.get('date'),
-                                status: formData.get('status'),
-                            };
-                            handleMarkAttendance(record);
+                            const updatedAttendance = registeredChildren.map((child) => ({
+                                name: child.name,
+                                date: new Date().toISOString().split('T')[0],
+                                status: formData.get(`status-${child.id}`),
+                            }));
+                            handleMarkAttendance(updatedAttendance);
                         }}
                     >
-                        <div className="form-group">
-                            <label htmlFor="name">Name</label>
-                            <input type="text" id="name" name="name" required />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="date">Date</label>
-                            <input type="date" id="date" name="date" required />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="status">Status</label>
-                            <select id="status" name="status" required>
-                                <option value="Present">Present</option>
-                                <option value="Absent">Absent</option>
-                            </select>
-                        </div>
+                        {registeredChildren.map((child) => (
+                            <div key={child.id} className="form-group">
+                                <Typography variant="body1">{child.name}</Typography>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name={`status-${child.id}`}
+                                        value="Present"
+                                        required
+                                    />
+                                    Present
+                                </label>
+                                <label style={{ marginLeft: '10px' }}>
+                                    <input
+                                        type="radio"
+                                        name={`status-${child.id}`}
+                                        value="Absent"
+                                    />
+                                    Absent
+                                </label>
+                            </div>
+                        ))}
                         <Button type="submit" variant="contained" color="primary">
                             Submit
                         </Button>
@@ -130,6 +194,55 @@ const Attendance = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setIsDialogOpen(false)} color="secondary">
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)}>
+                <DialogTitle>Edit Attendance</DialogTitle>
+                <DialogContent>
+                    {recordToEdit && (
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                const formData = new FormData(e.target);
+                                const updatedRecord = {
+                                    ...recordToEdit,
+                                    status: formData.get('status'),
+                                };
+                                handleSaveEdit(updatedRecord);
+                            }}
+                        >
+                            <Typography variant="body1"><strong>Name:</strong> {recordToEdit.name}</Typography>
+                            <Typography variant="body1"><strong>Date:</strong> {recordToEdit.date}</Typography>
+                            <div className="form-group">
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="status"
+                                        value="Present"
+                                        defaultChecked={recordToEdit.status === 'Present'}
+                                    />
+                                    Present
+                                </label>
+                                <label style={{ marginLeft: '10px' }}>
+                                    <input
+                                        type="radio"
+                                        name="status"
+                                        value="Absent"
+                                        defaultChecked={recordToEdit.status === 'Absent'}
+                                    />
+                                    Absent
+                                </label>
+                            </div>
+                            <Button type="submit" variant="contained" color="primary">
+                                Save
+                            </Button>
+                        </form>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setIsEditDialogOpen(false)} color="secondary">
                         Cancel
                     </Button>
                 </DialogActions>

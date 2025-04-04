@@ -27,20 +27,7 @@ const Parents = () => {
                     <Typography variant="body1" gutterBottom>
                         Welcome to the Parents Dashboard. Manage daycare bookings and view your child's activity here.
                     </Typography>
-                    <Box sx={{ marginTop: '20px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-                        <Button variant="contained" color="primary" href="/book-daycare">
-                            Book Daycare Slot
-                        </Button>
-                        <Button variant="contained" color="primary" href="/view-attendance">
-                            View Attendance
-                        </Button>
-                        <Button variant="contained" color="secondary" href="/register">
-                            Register & Book Slot
-                        </Button>
-                        <Button variant="contained" color="success" href="/add-child">
-                            Add Child
-                        </Button>
-                    </Box>
+                    
                     <Box sx={{ marginTop: '40px' }}>
                         <Typography variant="h5" gutterBottom>
                             Child Activity

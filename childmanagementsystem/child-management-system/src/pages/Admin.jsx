@@ -311,88 +311,9 @@ const Admin = () => {
             <main className="admin-main" style={{ marginLeft: 300, padding: '10px' }}>
                 {renderContent()}
             </main>
-            <Dialog open={isAssignDialogOpen} onClose={() => setIsAssignDialogOpen(false)}>
-                <DialogTitle>Assign Caregiver to Child</DialogTitle>
-                <DialogContent>
-                    <FormControl fullWidth sx={{ marginBottom: '20px' }}>
-                        <InputLabel id="caregiver-select-label">Select Caregiver</InputLabel>
-                        <Select
-                            labelId="caregiver-select-label"
-                            value={selectedCaregiver}
-                            onChange={(e) => setSelectedCaregiver(e.target.value)}
-                        >
-                            {caregiversList.map((caregiver, index) => (
-                                <MenuItem key={index} value={caregiver.name}>
-                                    {caregiver.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <FormControl fullWidth>
-                        <InputLabel id="child-select-label">Select Child</InputLabel>
-                        <Select
-                            labelId="child-select-label"
-                            value={selectedChild}
-                            onChange={(e) => setSelectedChild(e.target.value)}
-                        >
-                            {childrenList.map((child, index) => (
-                                <MenuItem key={index} value={child.name}>
-                                    {child.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setIsAssignDialogOpen(false)} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleAssign} color="primary">
-                        Assign
-                    </Button>
-                </DialogActions>
-            </Dialog>
-            <Dialog open={isEditChildDialogOpen} onClose={() => setIsEditChildDialogOpen(false)}>
-                <DialogTitle>Edit Child</DialogTitle>
-                <DialogContent>
-                    <Form
-                        onSubmit={handleEditChildSubmit}
-                        initialData={editChild}
-                        labels={{
-                            name: "Child's Name",
-                            age: 'Age',
-                            parentName: "Parent's Name",
-                        }}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setIsEditChildDialogOpen(false)} color="secondary">
-                        Cancel
-                    </Button>
-                </DialogActions>
-            </Dialog>
-            <Dialog open={isAddChildDialogOpen} onClose={() => setIsAddChildDialogOpen(false)}>
-                <DialogTitle>Add Child</DialogTitle>
-                <DialogContent>
-                    <Form
-                        onSubmit={handleAddChildSubmit}
-                        initialData={{}}
-                        labels={{
-                            name: "Child's Name",
-                            age: 'Age',
-                            parentName: "Parent's Name",
-                        }}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setIsAddChildDialogOpen(false)} color="secondary">
-                        Cancel
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            {/* Conditionally render Footer */}
+            {selectedPage !== 'attendance' && <Footer />}
         </div>
-        
-        <Footer />
         </>
     );
 };

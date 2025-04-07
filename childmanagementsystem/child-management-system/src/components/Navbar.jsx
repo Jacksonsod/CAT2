@@ -8,11 +8,16 @@ import { Drawer, List, ListItem, ListItemText, IconButton, Switch, Typography, u
 import "../styles/components.css";
 
 const Navbar = () => {
+  const [user, setUser] = useState(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    return storedUser
+      ? { ...storedUser, isAdmin: !!storedUser.isAdmin } // Ensure isAdmin is boolean
+      : null;
+  });
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false); // State for profile dialog
-  const [user, setUser] = useState(null); // State for user information
   const [isEditing, setIsEditing] = useState(false); // Add isEditing state
   const [editUser, setEditUser] = useState({ name: "", email: "" }); // State for editing user info
   const isMobile = useMediaQuery("(max-width:768px)");
@@ -21,10 +26,16 @@ const Navbar = () => {
   useEffect(() => {
     // Retrieve user information from local storage
     const storedUser = JSON.parse(localStorage.getItem("user"));
+    console.log("Stored User:", storedUser); // Debugging log
     if (storedUser) {
-      setUser({ name: storedUser.name, email: storedUser.email }); // Use registered email
+        // Ensure only non-sensitive data is stored
+        setUser({
+            name: storedUser.name,
+            email: storedUser.email,
+            isAdmin: !!storedUser.isAdmin, // Ensure isAdmin is boolean
+        });
     }
-  }, []);
+}, []);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -47,45 +58,39 @@ const Navbar = () => {
   };
 
   const handleViewProfile = () => {
-    setProfileOpen(true); // Open the profile dialog
+    setProfileOpen(true);
     handleMenuClose();
   };
 
   const handleProfileClose = () => {
-    setProfileOpen(false); // Close the profile dialog
+    setProfileOpen(false); 
   };
 
   const handleSignOut = () => {
-    // Clear user session data
-    localStorage.removeItem("user"); // Example: Remove user data from localStorage
+    localStorage.removeItem("user"); 
     handleMenuClose();
-    navigate("/login"); // Redirect to login page
+    navigate("/login");
   };
 
   const handleEditToggle = () => {
-    setIsEditing(!isEditing); // Add handleEditToggle function
+    setIsEditing(!isEditing);
   };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditUser({ ...editUser, [name]: value });
   };
-
   const handleSave = () => {
-    setUser({ ...user, ...editUser }); // Update user state with edited info
+    setUser({ ...user, ...editUser });
     setIsEditing(false);
-    setProfileOpen(false); // Close dialog after saving
+    setProfileOpen(false);
   };
-
   const menuItems = [
     { text: "Home", path: "/home" },
     { text: "Children", path: "/children" },
     { text: "Caregivers", path: "/caregivers" },
     { text: "Attendance", path: "/attendance" },
-    { text: "Admin", path: "/admin" },
     { text: "Parents", path: "/parents" },
   ];
-
   return (
     <>
       <AppBar position="fixed" sx={{ zIndex: 1201 }}>
@@ -104,6 +109,12 @@ const Navbar = () => {
                   {item.text}
                 </Button>
               ))}
+              {/* Show Admin link only if the user's role is Admin */}
+              {user?.isAdmin && (
+                <Button color="inherit" component={Link} to="/admin">
+                  Admin
+                </Button>
+              )}
               <div className="dark-mode-switch-container">
                 <Switch checked={isDarkMode} onChange={toggleDarkMode} />
                 <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -134,6 +145,14 @@ const Navbar = () => {
                 </NavLink>
               </ListItem>
             ))}
+            {/* Show Admin link only if the user's role is Admin */}
+            {user?.isAdmin && (
+              <ListItem button onClick={toggleDrawer(false)}>
+                <NavLink to="/admin" className="navbar-drawer-link">
+                  <ListItemText primary="Admin" />
+                </NavLink>
+              </ListItem>
+            )}
             <ListItem>
               <Switch checked={isDarkMode} onChange={toggleDarkMode} />
               <Typography variant="body2">

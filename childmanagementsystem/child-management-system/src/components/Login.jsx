@@ -54,7 +54,11 @@ const Login = () => {
 
         setError('');
         console.log('Navigating to Home'); // Debugging statement
-        navigate('/home'); // Ensure the route matches your defined path
+        if (role === "Admin") {
+            navigate('/admin'); // Navigate to admin page if role is Admin
+        } else {
+            navigate('/home'); // Navigate to home for other roles
+        }
     };
 
     return (
@@ -98,8 +102,24 @@ const Login = () => {
                     Don't have an account? <Link to="/signup">Sign Up</Link>
                 </p>
             </form>
+            {role === "Admin" && (
+                <p>
+                    <Link to="/admin"></Link>
+                </p>
+            )}
         </div>
     );
 };
 
+// Placeholder for Admin Page
+const AdminPage = () => {
+    return (
+        <div>
+            <h1>Welcome to the Admin Page</h1>
+            <p>This is the admin dashboard.</p>
+        </div>
+    );
+};
+
+export { AdminPage };
 export default Login;
